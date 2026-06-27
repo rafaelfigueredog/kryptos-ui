@@ -15,7 +15,7 @@ const services = [
   { name: "springboot-token-manager-service", tech: "Spring Boot", role: "Serviço de Gerenciamento de Tokens", componentKey: "ping" },
   { name: "redis-token-cache", tech: "Redis", role: "Serviço de Cache de Tokens", componentKey: "redis" },
   { name: "vault-secrets-manager", tech: "HashiCorp Vault", role: "Serviço de Gerenciamento de Credenciais", componentKey: "vault" },
-  { name: "keycloak-identity-provider", tech: "Keycloak", role: "Serviço de Autenticação e Identidade", componentKey: null },
+  { name: "keycloak-identity-provider", tech: "Keycloak", role: "Serviço de Autenticação e Identidade", componentKey: "keycloak" },
 ];
 
 const statusBadge: Record<ServiceStatus, "success" | "warning" | "error" | "gray"> = {
@@ -41,14 +41,9 @@ const Dashboard = () => {
         setApiStatus("up");
         const resolved: Record<string, ServiceStatus> = {};
         services.forEach(svc => {
-          if (svc.componentKey && data.components?.[svc.componentKey]) {
-            const s = data.components[svc.componentKey].status?.toLowerCase();
-            resolved[svc.name] = s === "up" ? "healthy" : "degraded";
-          } else if (!svc.componentKey) {
-            resolved[svc.name] = "unknown";
-          } else {
-            resolved[svc.name] = "unknown";
-          }
+          const component = data.components?.[svc.componentKey];
+          const s = component?.status?.toLowerCase();
+          resolved[svc.name] = s === "up" ? "healthy" : s ? "degraded" : "unknown";
         });
         resolved["springboot-token-manager-service"] = "healthy";
         setStatuses(resolved);
