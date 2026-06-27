@@ -1,32 +1,49 @@
 const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8090";
 
+export type Client = {
+  clientId: string;
+  description: string;
+  realm: string;
+};
+
 export type TokenResponse = {
   accessToken: string;
   tokenType: string;
   expiresIn: number;
   realm: string;
-  clientId: string;
+};
+
+const api = async (path: string, options?: RequestInit) => {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    headers: { "Content-Type": "application/json" },
+    ...options,
+  });
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  return res.status === 204 ? null : res.json();
+};
+
+export const clientService = {
+  list: (): Promise<Client[]> => api("/api/v1/clients"),
+
+  create: (clientId: string, clientSecret: string, description: string): Promise<Client> =>
+    api("/api/v1/clients", { method: "POST", body: JSON.stringify({ clientId, clientSecret, description }) }),
+
+  update: (clientId: string, clientSecret: string, description: string): Promise<Client> =>
+    api(`/api/v1/clients/${clientId}`, { method: "PUT", body: JSON.stringify({ clientId, clientSecret, description }) }),
+
+  remove: (clientId: string): Promise<null> =>
+    api(`/api/v1/clients/${clientId}`, { method: "DELETE" }),
 };
 
 export const tokenService = {
-  async requestToken(clientId: string, realm: string): Promise<TokenResponse> {
-    const res = await fetch(`${BASE_URL}/api/v1/tokens`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ clientId, realm }),
-    });
-    if (!res.ok) throw new Error(`Erro ao solicitar token: ${res.status}`);
-    return res.json();
-  },
+  request: (clientId: string): Promise<TokenResponse> =>
+    api("/api/v1/tokens", { method: "POST", body: JSON.stringify({ clientId }) }),
 
-  async revokeToken(clientId: string): Promise<void> {
-    const res = await fetch(`${BASE_URL}/api/v1/tokens/${clientId}`, { method: "DELETE" });
-    if (!res.ok) throw new Error(`Erro ao revogar token: ${res.status}`);
-  },
+  revoke: (clientId: string): Promise<null> =>
+    api(`/api/v1/tokens/${clientId}`, { method: "DELETE" }),
+};
 
-  async healthCheck(): Promise<{ status: string }> {
-    const res = await fetch(`${BASE_URL}/actuator/health`);
-    if (!res.ok) throw new Error("Health check falhou");
-    return res.json();
-  },
+export const healthService = {
+  check: (): Promise<{ status: string; components: Record<string, { status: string }> }> =>
+    api("/actuator/health"),
 };

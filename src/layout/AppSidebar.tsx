@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useSidebar } from "../context/SidebarContext";
 import {
-  GridIcon, KeyIcon, ChevronDownIcon, HorizontalDotsIcon, UserCircleIcon,
+  GridIcon, KeyIcon, ChevronDownIcon, HorizontalDotsIcon,
 } from "../icons";
 
 type NavItem = {
@@ -15,13 +15,12 @@ type NavItem = {
 const navItems: NavItem[] = [
   { icon: <GridIcon />, name: "Dashboard", path: "/" },
   {
-    icon: <KeyIcon />, name: "Clients",
+    icon: <KeyIcon />, name: "Clientes OAuth2",
     subItems: [
-      { name: "Listar Clients", path: "/clients" },
-      { name: "Novo Client", path: "/clients/new" },
+      { name: "Listar Clientes", path: "/clients" },
+      { name: "Novo Cliente", path: "/clients/new" },
     ],
   },
-  { icon: <UserCircleIcon />, name: "Configurações", path: "/settings" },
 ];
 
 const AppSidebar = () => {
@@ -49,19 +48,20 @@ const AppSidebar = () => {
 
   return (
     <aside
-      className={`fixed flex flex-col top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-full transition-all duration-300 ease-in-out z-50 border-r border-gray-200
-        ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
-        ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
-        xl:translate-x-0`}
+      className={`fixed flex flex-col top-0 px-5 left-0 bg-white dark:bg-gray-900 text-gray-900 h-full transition-all duration-300 ease-in-out z-50 border-r border-gray-200 dark:border-gray-800 xl:translate-x-0 ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}`}
+      style={{
+        width: isExpanded || isMobileOpen ? "290px" : isHovered ? "290px" : "90px",
+        borderLeft: "3px solid #0077b6",
+      }}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className={`py-8 flex ${!isExpanded && !isHovered ? "xl:justify-center" : "justify-start"}`}>
         <NavLink to="/">
           {showLabel ? (
-            <span className="text-xl font-bold text-brand-500 tracking-tight">KRYPTOS</span>
+            <span className="text-xl font-bold tracking-tight" style={{ background: "linear-gradient(135deg, #0077b6, #00b4d8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>KRYPTOS</span>
           ) : (
-            <span className="text-xl font-bold text-brand-500">K</span>
+            <span className="text-xl font-bold" style={{ color: "#0077b6" }}>K</span>
           )}
         </NavLink>
       </div>
@@ -95,6 +95,7 @@ const AppSidebar = () => {
                             <li key={sub.name}>
                               <NavLink
                                 to={sub.path}
+                                end
                                 className={({ isActive }) => `menu-dropdown-item ${isActive ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive"}`}
                               >
                                 {sub.name}
